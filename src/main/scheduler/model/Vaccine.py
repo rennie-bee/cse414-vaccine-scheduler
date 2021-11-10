@@ -1,46 +1,30 @@
 class Vaccine:
-    def __init__(self, builder):
-        self.vaccineName = builder.vaccineName
-        self.availableDoses = builder.availableDoses
-        self.requiredDoses = builder.requiredDoses
+    def __init__(self, vaccine_name, available_doses, required_doses):
+        self.vaccine_name = vaccine_name
+        self.required_doses = required_doses
+        self.available_doses = available_doses
 
     # getters
-    def getVaccineName() -> String:
-        return self.vaccineName
+    def get_vaccine_name(self):
+        return self.vaccine_name
 
-    def getAvailableDoses() -> int:
-        return self.availableDoses
+    def get_available_doses(self):
+        return self.available_doses
 
-    def getRequiredDoses() -> int:
-        return self.requiredDoses
+    def get_required_doses(self):
+        return self.required_doses
 
     # Increment the available doses
-    def increaseAvailableDoses(num):
+    def increase_available_doses(self, num):
         if num <= 0:
-            throw ValueError("Argument cannot be negative!")
-        self.availableDoses += num
+            ValueError("Argument cannot be negative!")
+        self.available_doses += num
 
     # Decrement the available doses
-    def decreaseAvailableDoses(num):
+    def decrease_available_doses(self, num):
         if self.availableDoses - num < 0:
-            throw ValueError("Not enough available doses!")
-        self.availableDoses -= num
+            ValueError("Not enough available doses!")
+        self.available_doses -= num
 
-    def __str__():
-          return "Vaccine{" +
-            "vaccineName='" + str(self.vaccineName) + '\'' +
-            ", requiredDoses=" + str(self.requiredDoses) +
-            ", availableDoses=" + str(self.availableDoses) +
-            "}"
-
-    class VaccineBuilder:
-        def __init__(self, vaccineName, requiredDoses):
-            self.vaccineName = vaccineName
-            self.requiredDoses = requiredDoses
-
-        def availableDoses(availableDoses):
-            self.availableDoses = availableDoses
-            return self
-
-        def build():
-            return Vaccine(self)
+    def __str__(self):
+        return f"(Vaccine Name: {self.vaccine_name}, Required Doses: {self.required_doses}, Available Doses: {self.available_doses})"

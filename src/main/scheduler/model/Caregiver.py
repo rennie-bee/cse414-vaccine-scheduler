@@ -1,2 +1,2 @@
 class Caregiver:
-    
+    pass
