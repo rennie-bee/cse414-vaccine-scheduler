@@ -2,11 +2,13 @@ import pymssql
 import os
 
 class ConnectionManager:
-    self.server_name = os.getenv("Server")
-    self.user = os.getenv("UserID")
-    self.db_name = os.getenv("DBName")
-    self.password = os.getenv("Password")
-    self.conn = None
+
+    def __init__(self):
+      self.server_name = os.getenv("Server")
+      self.user = os.getenv("UserID")
+      self.db_name = os.getenv("DBName")
+      self.password = os.getenv("Password")
+      self.conn = None
 
     def create_connection(self):
         try:
@@ -17,7 +19,7 @@ class ConnectionManager:
             print("Exception code: " + str(sqlrc))
             if len(db_err) > 1:
                 print("Exception message: " + db_err.args[1])
-        return conn
+        return self.conn
 
     def close_connection(self):
         try:

@@ -17,7 +17,6 @@ def create_account():
   TODO: add logic for creating an account
   once we'v e created the user, we can go back to processing create and login again
   '''
-
   process_create_and_login()
 
 def process_create_and_login():
