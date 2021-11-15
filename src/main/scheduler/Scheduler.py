@@ -30,15 +30,15 @@ def create_caregiver(tokens):
     # check 1: the length for tokens need to be exactly 3 to include all information (with the operation name)
     if len(tokens) != 3:
         print("Please try again!")
-        return 
-    
+        return
+
     username = tokens[1]
     password = tokens[2]
     # check 2: check if the username has been taken already
-    if username_exists_caregiver(username): 
+    if username_exists_caregiver(username):
         print("Username taken, try again!")
         return
-    
+
     salt = Util.generate_salt()
     hash = Util.generate_hash(password, salt)
 
@@ -64,8 +64,8 @@ def username_exists_caregiver(username):
         return username in result_dict
     except pymssql.Error as db_err:
         print("Error occurred when checking username")
-    
-    cm.closeConnection()
+
+    cm.close_connection()
     return True
 
 def login_patient(tokens):
@@ -184,7 +184,7 @@ def add_doses(tokens):
     else:
         # if the vaccine is not null, meaning that the vaccine already exists in our table
         try:
-            vaccine.increaseAvailableDoses(doses)
+            vaccine.increase_available_doses(doses)
         except pymssql.Error as db_err:
             print("Error occurred when adding doses")
 
@@ -228,7 +228,7 @@ def start():
         except ValueError:
             print("Type in a valid argument")
             break
-      
+
         response = response.lower()
         tokens = response.split(" ")
         if len(tokens) == 0:
@@ -272,9 +272,8 @@ if __name__ == "__main__":
     // and then construct a map of vaccineName -> vaccineObject
     '''
 
-    # start command line 
+    # start command line
     print()
     print("Welcome to the COVID-19 Vaccine Reservation Scheduling Application!")
 
     start()
-  
