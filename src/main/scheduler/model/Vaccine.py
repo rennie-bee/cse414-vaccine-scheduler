@@ -1,3 +1,6 @@
+import pymssql
+import scheduler.db.ConnectionManager
+
 class Vaccine:
     def __init__(self, vaccine_name, available_doses, required_doses):
         self.vaccine_name = vaccine_name
