@@ -46,7 +46,7 @@ def create_caregiver(tokens):
     try :
         currentCaregiver = Caregiver(username, salt, hash)
         # save to caregiver information to our database
-        currentCaregiver.saveToDB()
+        currentCaregiver.save_to_db()
         print(" *** Account created successfully *** ")
     except pymssql.Error as db_err:
         print("Create failed")

@@ -9,6 +9,23 @@ class Vaccine:
         self.available_doses = available_doses
 
     # getters
+    def get(self):
+        cm = ConnectionManager()
+        conn = cm.create_connection()
+        cursor = conn.cursor()
+
+        get_vaccine = "SELECT Name, Doses FROM Vaccines WHERE Name = %s";
+        try:
+            cursor.execute(get_vaccine, self.vaccine_name)
+            for row in cursor:
+                self.available_doses = row['Doses']
+                return self
+        except pymssql.error as db_err:
+            print("Error occurred when getting Vaccine")
+        cm.close_connection()
+        return None
+
+
     def get_vaccine_name(self):
         return self.vaccine_name
 
