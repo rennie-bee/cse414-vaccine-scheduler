@@ -6,8 +6,8 @@ class ConnectionManager:
 
     def __init__(self):
         self.server_name = os.getenv("Server")
-        self.user = os.getenv("UserID")
         self.db_name = os.getenv("DBName")
+        self.user = os.getenv("UserID")
         self.password = os.getenv("Password")
         self.conn = None
 
