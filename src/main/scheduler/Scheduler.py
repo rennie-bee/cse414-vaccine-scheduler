@@ -120,7 +120,7 @@ def upload_availability(tokens):
     #  upload_availability <date>
     #  check 1: check if the current logged-in user is a caregiver
     global current_caregiver
-    if current_caregiver== None:
+    if current_caregiver == None:
         print("Please login as a caregiver first!")
         return
 
@@ -138,7 +138,7 @@ def upload_availability(tokens):
     try:
         d = datetime.datetime(year, month, day)
         global current_caregiver
-        current_caregiver.uploadAvailability(d)
+        current_caregiver.upload_availability(d)
         print("Availability uploaded!")
     except ValueError:
         print("Please enter a valid date!")
