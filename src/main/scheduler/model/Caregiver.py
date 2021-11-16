@@ -1,25 +1,20 @@
 import sys
-from ..scheduler.util.Util import Util
-from ..scheduler.db.ConnectionManager import ConnectionManager
+sys.path.append("../util/*")
+sys.path.append("../db/*")
+from util.Util import Util
+from db.ConnectionManager import ConnectionManager
 import pymssql
+
 
 class Caregiver:
     def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.salt = Util.generate_salt();
+        self.salt = Util.generate_salt()
         self.hash = Util.generate_hash(password, self.salt)
 
-
-    def __init__(self, username, salt, hash):
-        self.username = username
-        self.salt = salt
-        self.hash = hash
-
-
     # getters
-
-    def get():
+    def get(self):
         cm = ConnectionManager()
         conn = cm.create_connection()
         cursor = conn.cursor(as_dict=True)
@@ -36,26 +31,22 @@ class Caregiver:
                     return None
                 else:
                     self.salt = curr_salt
-                    self.hash - curr_hash
+                    self.hash = curr_hash
                     return self
-        except pymssql.error as db_err:
+        except pymssql.Error:
             print("Error occurred when getting Caregivers")
             
         cm.close_connection()
         return None
 
-
     def get_username(self):
         return self.username
-
 
     def get_salt(self):
         return self.salt
 
-
     def get_hash(self):
         return self.hash
-
 
     def save_to_db(self):
         cm = ConnectionManager()
@@ -67,10 +58,9 @@ class Caregiver:
             cursor.execute(add_caregivers, (self.username, self.salt, self.hash))
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
-        except pymssql.error as db_err:
+        except pymssql.Error:
             print("Error occurred when inserting Caregivers")
         cm.close_connection()
-
 
     # Insert availability with parameter date d
     def upload_availability(self, d):
@@ -78,11 +68,11 @@ class Caregiver:
         conn = cm.create_connection()
         cursor = conn.cursor()
 
-        add_availability  = "INSERT INTO Availabilities VALUES (%s , %s)"
+        add_availability = "INSERT INTO Availabilities VALUES (%s , %s)"
         try:
-            cursor.execute(update_vaccine_availability, (d, self.username))
+            cursor.execute(add_availability, (d, self.username))
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
-        except pymssql.error as db_err:
+        except pymssql.Error:
             print("Error occurred when updating caregiver availability")
         cm.close_connection()
