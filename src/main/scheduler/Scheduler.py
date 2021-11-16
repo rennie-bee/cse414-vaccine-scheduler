@@ -44,7 +44,7 @@ def create_caregiver(tokens):
 
     # create the caregiver
     try:
-        caregiver = Caregiver(username, salt, hash)
+        caregiver = Caregiver(username, salt=salt, hash=hash)
         # save to caregiver information to our database
         caregiver.save_to_db()
         print(" *** Account created successfully *** ")
@@ -60,14 +60,14 @@ def username_exists_caregiver(username):
     select_username = "SELECT * FROM Caregivers WHERE Username = %s"
     try:
         cursor = conn.cursor(as_dict=True)
-        result_dict = cursor.execute(select_username, username)
+        cursor.execute(select_username, username)
         #  returns false if the cursor is not before the first record or if there are no rows in the ResultSet.
-        return username in result_dict
+        for row in cursor:
+            return row['Username'] is None
     except pymssql.Error:
         print("Error occurred when checking username")
-
     cm.close_connection()
-    return True
+    return False
 
 
 def login_patient(tokens):
@@ -81,7 +81,7 @@ def login_caregiver(tokens):
     # login_caregiver <username> <password>
     # check 1: if someone's already logged-in, they need to log out first
     global current_caregiver
-    if current_caregiver is not None or current_patient is None:
+    if current_caregiver is not None or current_patient is not None:
         print("Already logged-in!")
         return
 
@@ -95,7 +95,7 @@ def login_caregiver(tokens):
 
     caregiver = None
     try:
-        caregiver = Caregiver(username, password).get()
+        caregiver = Caregiver(username, password=password).get()
     except pymssql.Error:
         print("Error occurred when logging in")
 
@@ -174,7 +174,7 @@ def add_doses(tokens):
     doses = int(tokens[2])
     vaccine = None
     try:
-        vaccine = Vaccine(vaccine_name).get()
+        vaccine = Vaccine(vaccine_name, doses).get()
     except pymssql.Error:
         print("Error occurred when adding doses")
 
@@ -251,7 +251,7 @@ def start():
         elif operation == "login_patient":
             login_patient(tokens)
         elif operation == "login_caregiver":
-            login_caregiver()
+            login_caregiver(tokens)
         elif operation == "search_caregiver_schedule":
             search_caregiver_schedule(tokens)
         elif operation == "reserve":

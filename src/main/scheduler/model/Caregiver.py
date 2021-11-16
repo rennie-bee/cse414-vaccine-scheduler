@@ -7,11 +7,11 @@ import pymssql
 
 
 class Caregiver:
-    def __init__(self, username, password):
+    def __init__(self, username, password=None, salt=None, hash=None):
         self.username = username
         self.password = password
-        self.salt = Util.generate_salt()
-        self.hash = Util.generate_hash(password, self.salt)
+        self.salt = salt
+        self.hash = hash
 
     # getters
     def get(self):
@@ -31,7 +31,7 @@ class Caregiver:
                     return None
                 else:
                     self.salt = curr_salt
-                    self.hash = curr_hash
+                    self.hash = calculated_hash
                     return self
         except pymssql.Error:
             print("Error occurred when getting Caregivers")
@@ -53,13 +53,15 @@ class Caregiver:
         conn = cm.create_connection()
         cursor = conn.cursor()
 
-        add_caregivers = "INSERT INTO Caregivers VALUES (%s, %b, %b)"
+        add_caregivers = "INSERT INTO Caregivers VALUES (%s, %s, %s)"
         try:
             cursor.execute(add_caregivers, (self.username, self.salt, self.hash))
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
-        except pymssql.Error:
+        except pymssql.Error as db_err:
             print("Error occurred when inserting Caregivers")
+            sqlrc = str(db_err.args[0])
+            print("Exception code: " + str(sqlrc))
         cm.close_connection()
 
     # Insert availability with parameter date d
