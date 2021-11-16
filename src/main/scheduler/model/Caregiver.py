@@ -1,5 +1,6 @@
 import sys
 from ..scheduler.util.Util import Util
+from ..scheduler.db.ConnectionManager import ConnectionManager
 import pymssql
 
 class Caregiver:
