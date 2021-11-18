@@ -35,7 +35,8 @@ class Caregiver:
                     return self
         except pymssql.Error:
             print("Error occurred when getting Caregivers")
-            
+            cm.close_connection()
+
         cm.close_connection()
         return None
 
@@ -62,6 +63,7 @@ class Caregiver:
             print("Error occurred when inserting Caregivers")
             sqlrc = str(db_err.args[0])
             print("Exception code: " + str(sqlrc))
+            cm.close_connection()
         cm.close_connection()
 
     # Insert availability with parameter date d
@@ -77,4 +79,5 @@ class Caregiver:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when updating caregiver availability")
+            cm.close_connection()
         cm.close_connection()
