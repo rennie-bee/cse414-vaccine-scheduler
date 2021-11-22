@@ -46,7 +46,11 @@ def create_caregiver(tokens):
     try:
         caregiver = Caregiver(username, salt=salt, hash=hash)
         # save to caregiver information to our database
-        caregiver.save_to_db()
+        try:
+            caregiver.save_to_db()
+        except:
+            print("Create failed, Cannot save")
+            return
         print(" *** Account created successfully *** ")
     except pymssql.Error:
         print("Create failed")
@@ -63,9 +67,10 @@ def username_exists_caregiver(username):
         cursor.execute(select_username, username)
         #  returns false if the cursor is not before the first record or if there are no rows in the ResultSet.
         for row in cursor:
-            return row['Username'] is None
+            return row['Username'] is not None
     except pymssql.Error:
         print("Error occurred when checking username")
+        return None
     cm.close_connection()
     return False
 
@@ -95,7 +100,11 @@ def login_caregiver(tokens):
 
     caregiver = None
     try:
-        caregiver = Caregiver(username, password=password).get()
+        try:
+            caregiver = Caregiver(username, password=password).get()
+        except:
+            print("Get Failed")
+            return
     except pymssql.Error:
         print("Error occurred when logging in")
 
@@ -142,7 +151,10 @@ def upload_availability(tokens):
     year = int(date_tokens[2])
     try:
         d = datetime.datetime(year, month, day)
-        current_caregiver.upload_availability(d)
+        try:
+            current_caregiver.upload_availability(d)
+        except:
+            print("Upload Availability Failed")
         print("Availability uploaded!")
     except ValueError:
         print("Please enter a valid date!")
@@ -174,7 +186,11 @@ def add_doses(tokens):
     doses = int(tokens[2])
     vaccine = None
     try:
-        vaccine = Vaccine(vaccine_name, doses).get()
+        try:
+            vaccine = Vaccine(vaccine_name, doses).get()
+        except:
+            print("Failed to get Vaccine!")
+            return
     except pymssql.Error:
         print("Error occurred when adding doses")
 
@@ -184,13 +200,21 @@ def add_doses(tokens):
     if vaccine is None:
         try:
             vaccine = Vaccine(vaccine_name, doses)
-            vaccine.save_to_db()
+            try:
+                vaccine.save_to_db()
+            except:
+                print("Failed To Save")
+                return
         except pymssql.Error:
             print("Error occurred when adding doses")
     else:
         # if the vaccine is not null, meaning that the vaccine already exists in our table
         try:
-            vaccine.increase_available_doses(doses)
+            try:
+                vaccine.increase_available_doses(doses)
+            except:
+                print("Failed to increase available doses!")
+                return
         except pymssql.Error:
             print("Error occurred when adding doses")
 
