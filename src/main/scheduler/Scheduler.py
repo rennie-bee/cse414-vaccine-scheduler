@@ -70,6 +70,7 @@ def username_exists_caregiver(username):
             return row['Username'] is not None
     except pymssql.Error:
         print("Error occurred when checking username")
+        cm.close_connection()
         return None
     cm.close_connection()
     return False
