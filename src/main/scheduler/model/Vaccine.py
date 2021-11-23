@@ -23,6 +23,7 @@ class Vaccine:
                 return self
         except pymssql.Error:
             print("Error occurred when getting Vaccine")
+            cm.close_connection()
         cm.close_connection()
         return None
 
@@ -44,6 +45,7 @@ class Vaccine:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when insert Vaccines")
+            cm.close_connection()
         cm.close_connection()
 
     # Increment the available doses
@@ -63,6 +65,7 @@ class Vaccine:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when updating vaccine availability")
+            cm.close_connection()
         cm.close_connection()
 
     # Decrement the available doses
@@ -82,6 +85,7 @@ class Vaccine:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when updating vaccine availability")
+            cm.close_connection()
         cm.close_connection()
 
     def __str__(self):

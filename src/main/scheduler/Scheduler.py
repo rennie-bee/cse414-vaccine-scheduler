@@ -71,7 +71,6 @@ def username_exists_caregiver(username):
     except pymssql.Error:
         print("Error occurred when checking username")
         cm.close_connection()
-        return None
     cm.close_connection()
     return False
 
