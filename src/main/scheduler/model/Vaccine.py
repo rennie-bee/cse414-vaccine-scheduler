@@ -19,12 +19,13 @@ class Vaccine:
         try:
             cursor.execute(get_vaccine, self.vaccine_name)
             for row in cursor:
-                self.available_doses = row['Doses']
+                self.available_doses = row[1]
                 return self
         except pymssql.Error:
             print("Error occurred when getting Vaccine")
+            raise
+        finally:
             cm.close_connection()
-        cm.close_connection()
         return None
 
     def get_vaccine_name(self):
@@ -34,6 +35,9 @@ class Vaccine:
         return self.available_doses
 
     def save_to_db(self):
+        if self.available_doses is None or self.available_doses <= 0:
+            raise ValueError("Argument cannot be negative!")
+
         cm = ConnectionManager()
         conn = cm.create_connection()
         cursor = conn.cursor()
@@ -45,13 +49,14 @@ class Vaccine:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when insert Vaccines")
+            raise
+        finally:
             cm.close_connection()
-        cm.close_connection()
 
     # Increment the available doses
     def increase_available_doses(self, num):
         if num <= 0:
-            ValueError("Argument cannot be negative!")
+            raise ValueError("Argument cannot be negative!")
         self.available_doses += num
 
         cm = ConnectionManager()
@@ -65,8 +70,9 @@ class Vaccine:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when updating vaccine availability")
+            raise
+        finally:
             cm.close_connection()
-        cm.close_connection()
 
     # Decrement the available doses
     def decrease_available_doses(self, num):
@@ -85,8 +91,9 @@ class Vaccine:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when updating vaccine availability")
+            raise
+        finally:
             cm.close_connection()
-        cm.close_connection()
 
     def __str__(self):
         return f"(Vaccine Name: {self.vaccine_name}, Available Doses: {self.available_doses})"

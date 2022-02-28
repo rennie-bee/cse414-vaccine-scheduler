@@ -1,4 +1,3 @@
-import sys
 from model.Vaccine import Vaccine
 from model.Caregiver import Caregiver
 from model.Patient import Patient
@@ -43,18 +42,19 @@ def create_caregiver(tokens):
     hash = Util.generate_hash(password, salt)
 
     # create the caregiver
+    caregiver = Caregiver(username, salt=salt, hash=hash)
+
+    # save to caregiver information to our database
     try:
-        caregiver = Caregiver(username, salt=salt, hash=hash)
-        # save to caregiver information to our database
-        try:
-            caregiver.save_to_db()
-        except:
-            print("Create failed, Cannot save")
-            return
-        print(" *** Account created successfully *** ")
-    except pymssql.Error:
-        print("Create failed")
+        caregiver.save_to_db()
+    except pymssql.Error as e:
+        print("Create caregiver failed, Cannot save")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Error:", e)
         return
+    print(" *** Account created successfully *** ")
 
 
 def username_exists_caregiver(username):
@@ -68,10 +68,14 @@ def username_exists_caregiver(username):
         #  returns false if the cursor is not before the first record or if there are no rows in the ResultSet.
         for row in cursor:
             return row['Username'] is not None
-    except pymssql.Error:
+    except pymssql.Error as e:
         print("Error occurred when checking username")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Error:", e)
+    finally:
         cm.close_connection()
-    cm.close_connection()
     return False
 
 
@@ -100,17 +104,19 @@ def login_caregiver(tokens):
 
     caregiver = None
     try:
-        try:
-            caregiver = Caregiver(username, password=password).get()
-        except:
-            print("Get Failed")
-            return
-    except pymssql.Error:
-        print("Error occurred when logging in")
+        caregiver = Caregiver(username, password=password).get()
+    except pymssql.Error as e:
+        print("Login caregiver failed")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Error occurred when logging in. Please try again!")
+        print("Error:", e)
+        return
 
     # check if the login was successful
     if caregiver is None:
-        print("Please try again!")
+        print("Error occurred when logging in. Please try again!")
     else:
         print("Caregiver logged in as: " + username)
         current_caregiver = caregiver
@@ -151,15 +157,19 @@ def upload_availability(tokens):
     year = int(date_tokens[2])
     try:
         d = datetime.datetime(year, month, day)
-        try:
-            current_caregiver.upload_availability(d)
-        except:
-            print("Upload Availability Failed")
-        print("Availability uploaded!")
+        current_caregiver.upload_availability(d)
+    except pymssql.Error as e:
+        print("Upload Availability Failed")
+        print("Db-Error:", e)
+        quit()
     except ValueError:
         print("Please enter a valid date!")
-    except pymssql.Error as db_err:
+        return
+    except Exception as e:
         print("Error occurred when uploading availability")
+        print("Error:", e)
+        return
+    print("Availability uploaded!")
 
 
 def cancel(tokens):
@@ -186,38 +196,42 @@ def add_doses(tokens):
     doses = int(tokens[2])
     vaccine = None
     try:
-        try:
-            vaccine = Vaccine(vaccine_name, doses).get()
-        except:
-            print("Failed to get Vaccine!")
-            return
-    except pymssql.Error:
-        print("Error occurred when adding doses")
+        vaccine = Vaccine(vaccine_name, doses).get()
+    except pymssql.Error as e:
+        print("Failed to get Vaccine information")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Failed to get Vaccine information")
+        print("Error:", e)
+        return
 
-    # check 3: if getter returns null, it means that we need to create the vaccine and insert it into the Vaccines
-    #          table
-
+    # if the vaccine is not found in the database, add a new (vaccine, doses) entry.
+    # else, update the existing entry by adding the new doses
     if vaccine is None:
+        vaccine = Vaccine(vaccine_name, doses)
         try:
-            vaccine = Vaccine(vaccine_name, doses)
-            try:
-                vaccine.save_to_db()
-            except:
-                print("Failed To Save")
-                return
-        except pymssql.Error:
-            print("Error occurred when adding doses")
+            vaccine.save_to_db()
+        except pymssql.Error as e:
+            print("Failed to add new Vaccine to database")
+            print("Db-Error:", e)
+            quit()
+        except Exception as e:
+            print("Failed to add new Vaccine to database")
+            print("Error:", e)
+            return
     else:
         # if the vaccine is not null, meaning that the vaccine already exists in our table
         try:
-            try:
-                vaccine.increase_available_doses(doses)
-            except:
-                print("Failed to increase available doses!")
-                return
-        except pymssql.Error:
-            print("Error occurred when adding doses")
-
+            vaccine.increase_available_doses(doses)
+        except pymssql.Error as e:
+            print("Failed to increase available doses for Vaccine")
+            print("Db-Error:", e)
+            quit()
+        except Exception as e:
+            print("Failed to increase available doses for Vaccine")
+            print("Error:", e)
+            return
     print("Doses updated!")
 
 

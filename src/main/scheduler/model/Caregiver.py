@@ -27,17 +27,19 @@ class Caregiver:
                 curr_hash = row['Hash']
                 calculated_hash = Util.generate_hash(self.password, curr_salt)
                 if not curr_hash == calculated_hash:
+                    print("Incorrect password")
                     cm.close_connection()
                     return None
                 else:
                     self.salt = curr_salt
                     self.hash = calculated_hash
+                    cm.close_connection()
                     return self
-        except pymssql.Error:
-            print("Error occurred when getting Caregivers")
+        except pymssql.Error as e:
+            print("Error occurred when fetching current caregiver")
+            raise e
+        finally:
             cm.close_connection()
-
-        cm.close_connection()
         return None
 
     def get_username(self):
@@ -59,12 +61,10 @@ class Caregiver:
             cursor.execute(add_caregivers, (self.username, self.salt, self.hash))
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
-        except pymssql.Error as db_err:
-            print("Error occurred when inserting Caregivers")
-            sqlrc = str(db_err.args[0])
-            print("Exception code: " + str(sqlrc))
+        except pymssql.Error:
+            raise
+        finally:
             cm.close_connection()
-        cm.close_connection()
 
     # Insert availability with parameter date d
     def upload_availability(self, d):
@@ -79,5 +79,6 @@ class Caregiver:
             conn.commit()
         except pymssql.Error:
             print("Error occurred when updating caregiver availability")
+            raise
+        finally:
             cm.close_connection()
-        cm.close_connection()
