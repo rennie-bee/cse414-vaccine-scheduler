@@ -27,7 +27,7 @@ class Caregiver:
                 curr_hash = row['Hash']
                 calculated_hash = Util.generate_hash(self.password, curr_salt)
                 if not curr_hash == calculated_hash:
-                    print("Incorrect password")
+                    # print("Incorrect password")
                     cm.close_connection()
                     return None
                 else:
@@ -36,7 +36,6 @@ class Caregiver:
                     cm.close_connection()
                     return self
         except pymssql.Error as e:
-            print("Error occurred when fetching current caregiver")
             raise e
         finally:
             cm.close_connection()
@@ -78,7 +77,7 @@ class Caregiver:
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
         except pymssql.Error:
-            print("Error occurred when updating caregiver availability")
+            # print("Error occurred when updating caregiver availability")
             raise
         finally:
             cm.close_connection()

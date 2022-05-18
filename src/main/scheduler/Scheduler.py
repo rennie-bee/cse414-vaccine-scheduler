@@ -28,7 +28,7 @@ def create_caregiver(tokens):
     # create_caregiver <username> <password>
     # check 1: the length for tokens need to be exactly 3 to include all information (with the operation name)
     if len(tokens) != 3:
-        print("Please try again!")
+        print("Failed to create user.")
         return
 
     username = tokens[1]
@@ -48,13 +48,14 @@ def create_caregiver(tokens):
     try:
         caregiver.save_to_db()
     except pymssql.Error as e:
-        print("Create caregiver failed, Cannot save")
+        print("Failed to create user.")
         print("Db-Error:", e)
         quit()
     except Exception as e:
-        print("Error:", e)
+        print("Failed to create user.")
+        print(e)
         return
-    print(" *** Account created successfully *** ")
+    print("Created user ", username)
 
 
 def username_exists_caregiver(username):
@@ -73,6 +74,7 @@ def username_exists_caregiver(username):
         print("Db-Error:", e)
         quit()
     except Exception as e:
+        print("Error occurred when checking username")
         print("Error:", e)
     finally:
         cm.close_connection()
@@ -91,12 +93,12 @@ def login_caregiver(tokens):
     # check 1: if someone's already logged-in, they need to log out first
     global current_caregiver
     if current_caregiver is not None or current_patient is not None:
-        print("Already logged-in!")
+        print("User already logged in.")
         return
 
     # check 2: the length for tokens need to be exactly 3 to include all information (with the operation name)
     if len(tokens) != 3:
-        print("Please try again!")
+        print("Login failed.")
         return
 
     username = tokens[1]
@@ -106,19 +108,19 @@ def login_caregiver(tokens):
     try:
         caregiver = Caregiver(username, password=password).get()
     except pymssql.Error as e:
-        print("Login caregiver failed")
+        print("Login failed.")
         print("Db-Error:", e)
         quit()
     except Exception as e:
-        print("Error occurred when logging in. Please try again!")
+        print("Login failed.")
         print("Error:", e)
         return
 
     # check if the login was successful
     if caregiver is None:
-        print("Error occurred when logging in. Please try again!")
+        print("Login failed.")
     else:
-        print("Caregiver logged in as: " + username)
+        print("Logged in as: " + username)
         current_caregiver = caregiver
 
 
@@ -198,11 +200,11 @@ def add_doses(tokens):
     try:
         vaccine = Vaccine(vaccine_name, doses).get()
     except pymssql.Error as e:
-        print("Failed to get Vaccine information")
+        print("Error occurred when adding doses")
         print("Db-Error:", e)
         quit()
     except Exception as e:
-        print("Failed to get Vaccine information")
+        print("Error occurred when adding doses")
         print("Error:", e)
         return
 
@@ -213,11 +215,11 @@ def add_doses(tokens):
         try:
             vaccine.save_to_db()
         except pymssql.Error as e:
-            print("Failed to add new Vaccine to database")
+            print("Error occurred when adding doses")
             print("Db-Error:", e)
             quit()
         except Exception as e:
-            print("Failed to add new Vaccine to database")
+            print("Error occurred when adding doses")
             print("Error:", e)
             return
     else:
@@ -225,11 +227,11 @@ def add_doses(tokens):
         try:
             vaccine.increase_available_doses(doses)
         except pymssql.Error as e:
-            print("Failed to increase available doses for Vaccine")
+            print("Error occurred when adding doses")
             print("Db-Error:", e)
             quit()
         except Exception as e:
-            print("Failed to increase available doses for Vaccine")
+            print("Error occurred when adding doses")
             print("Error:", e)
             return
     print("Doses updated!")

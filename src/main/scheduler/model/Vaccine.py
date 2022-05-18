@@ -22,7 +22,7 @@ class Vaccine:
                 self.available_doses = row[1]
                 return self
         except pymssql.Error:
-            print("Error occurred when getting Vaccine")
+            # print("Error occurred when getting Vaccine")
             raise
         finally:
             cm.close_connection()
@@ -48,7 +48,7 @@ class Vaccine:
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
         except pymssql.Error:
-            print("Error occurred when insert Vaccines")
+            # print("Error occurred when insert Vaccines")
             raise
         finally:
             cm.close_connection()
@@ -69,7 +69,7 @@ class Vaccine:
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
         except pymssql.Error:
-            print("Error occurred when updating vaccine availability")
+            # print("Error occurred when updating vaccine availability")
             raise
         finally:
             cm.close_connection()
@@ -90,7 +90,7 @@ class Vaccine:
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
         except pymssql.Error:
-            print("Error occurred when updating vaccine availability")
+            # print("Error occurred when updating vaccine availability")
             raise
         finally:
             cm.close_connection()
