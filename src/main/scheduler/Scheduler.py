@@ -21,7 +21,35 @@ def create_patient(tokens):
     """
     TODO: Part 1
     """
-    pass
+    # create patient <username> <password>
+    # check 1: the length for tokens need to be exactly 3 to include all information (with the operation name)
+    if len(tokens) != 3:
+        print("Failed to create user.")
+        return
+
+    patient_name = tokens[1]
+    patient_pwd = tokens[2]
+    if username_exists_patient(patient_name):
+        print("Username taken, try again!")
+        return
+
+    salt = Util.generate_salt()
+    pwd_hash = Util.generate_hash(patient_pwd, salt)
+    # create the patient
+    patient = Patient(patient_name, salt=salt, hash=pwd_hash)
+
+    # save to patient information to our database
+    try:
+        patient.save_to_db()
+    except pymssql.Error as e:
+        print("Failed to create patient.")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Failed to create patient.")
+        print(e)
+        return
+    print("Created patient: ", patient_name)
 
 
 def create_caregiver(tokens):
@@ -58,6 +86,29 @@ def create_caregiver(tokens):
     print("Created user ", username)
 
 
+def username_exists_patient(patient_name):
+    cm = ConnectionManager()
+    conn = cm.create_connection()
+
+    select_username = "SELECT * FROM Patients WHERE Username = %s"
+    try:
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute(select_username, patient_name)
+        #  returns false if the cursor is not before the first record or if there are no rows in the ResultSet.
+        for row in cursor:
+            return row['Username'] is not None
+    except pymssql.Error as e:
+        print("Error occurred when checking patient's name")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Error occurred when checking patient's name")
+        print("Error:", e)
+    finally:
+        cm.close_connection()
+    return False
+
+
 def username_exists_caregiver(username):
     cm = ConnectionManager()
     conn = cm.create_connection()
@@ -85,7 +136,39 @@ def login_patient(tokens):
     """
     TODO: Part 1
     """
-    pass
+    # login_patient <username> <password>
+    # check 1: if someone's already logged-in, they need to log out first
+    global current_patient
+    if current_patient is not None or current_patient is not None:
+        print("User already logged in.")
+        return
+
+    # check 2: the length for tokens need to be exactly 3 to include all information (with the operation name)
+    if len(tokens) != 3:
+        print("Login failed.")
+        return
+
+    username = tokens[1]
+    password = tokens[2]
+
+    patient = None
+    try:
+        patient = Patient(username, password=password).get()
+    except pymssql.Error as e:
+        print("Login failed.")
+        print("Db-Error:", e)
+        quit()
+    except Exception as e:
+        print("Login failed.")
+        print("Error:", e)
+        return
+
+    # check if the login was successful
+    if patient is None:
+        print("Login failed.")
+    else:
+        print("Logged in as: " + username)
+        current_patient = patient
 
 
 def login_caregiver(tokens):
@@ -106,7 +189,10 @@ def login_caregiver(tokens):
 
     caregiver = None
     try:
-        caregiver = Caregiver(username, password=password).get()
+        caregiver = Caregiver(
+            username=username,
+            password=password
+        ).get()
     except pymssql.Error as e:
         print("Login failed.")
         print("Db-Error:", e)
@@ -128,7 +214,36 @@ def search_caregiver_schedule(tokens):
     """
     TODO: Part 2
     """
-    pass
+    # search_caregiver_schedule <date>
+    global current_patient, current_caregiver
+    if current_patient is None and current_caregiver is None:
+        print("Please login as a patient/caregiver first!")
+        return
+
+    if len(tokens) != 2:
+        print("please try again!")
+
+    date = tokens[1]
+    # assume input is hyphenated in the format mm-dd-yyyy
+    date_tokens = date.split("-")
+    month = int(date_tokens[0])
+    day = int(date_tokens[1])
+    year = int(date_tokens[2])
+    try:
+        d = datetime.datetime(year, month, day)
+        current_caregiver.upload_availability(d)
+    except pymssql.Error as e:
+        print("Please try again!")
+        print("Db-Error:", e)
+        quit()
+    except ValueError:
+        print("Please try again!")
+        return
+    except Exception as e:
+        print("Please try again!")
+        print("Error:", e)
+        return
+    print("Availability uploaded!")
 
 
 def reserve(tokens):
@@ -241,14 +356,45 @@ def show_appointments(tokens):
     '''
     TODO: Part 2
     '''
-    pass
+    global current_patient, current_caregiver
+    if len(tokens) != 1:
+        print("Please try again!")
+    if current_caregiver is None and current_patient is None:
+        print("Please login first.")
+        return
+    # else:
+    #     cm = ConnectionManager()
+    #     conn = cm.create_connection()
+    #     cursor = conn.cursor()
+    #
+    #     if current_caregiver is not None:
+    #         add_availability = "INSERT INTO Availabilities VALUES (%s , %s)"
+    #         str1 = "SELECT ROW_NUMBER() OVER (ORDER BY Reservations.Time) AS AppointmentID, Vaccines.Name AS VaccineName, Reservations.Time AS Date,Patients.Username AS PatientName "
+    #         str2 = "FROM Reservations "
+    #         str3 = "JOIN Vaccines ON Reservations.VaccineName = %s JOIN Patients ON Reservations.PatientName = %s JOIN Caregivers ON Reservations.CaregiverName = %s ORDER BY AppointmentID"
+    #         show_appoint_caregiver = str1 + str2 + str3
+    #         try:
+    #             cursor.execute(show_appoint_caregiver, current_caregiver.)
+    #     else:
+
+    print("Successfully logged out!")
 
 
 def logout(tokens):
     """
     TODO: Part 2
     """
-    pass
+    global current_patient, current_caregiver
+    if len(tokens) != 1:
+        print("Please try again!")
+    if current_patient is not None:
+        current_patient = None
+    elif current_caregiver is not None:
+        current_caregiver = None
+    else:
+        print("Please login first.")
+        return
+    print("Successfully logged out!")
 
 
 def start():

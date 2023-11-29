@@ -3,7 +3,7 @@ import os
 
 
 class Util:
-    def generate_salt():
+    def generate_salt(self):
         return os.urandom(16)
 
     def generate_hash(password, salt):
