@@ -69,7 +69,7 @@ def create_caregiver(tokens):
     salt = Util.generate_salt()
     hash = Util.generate_hash(password, salt)
 
-    # create the caregiver
+    # create caregiver object
     caregiver = Caregiver(username, salt=salt, hash=hash)
 
     # save to caregiver information to our database
@@ -230,8 +230,31 @@ def search_caregiver_schedule(tokens):
     day = int(date_tokens[1])
     year = int(date_tokens[2])
     try:
-        d = datetime.datetime(year, month, day)
-        current_caregiver.upload_availability(d)
+        cm = ConnectionManager()
+        conn = cm.create_connection()
+        cursor = conn.cursor()
+        dt = datetime.datetime(year, month, day)
+
+        sentence1 = """
+                SELECT Username
+                FROM [dbo].[Availabilities] A
+                WHERE A.Time = %s
+                ORDER BY A.Username"""
+        sentence2 = """
+                SELECT Name, Doses
+                FROM [dbo].[Vaccines] V
+                """
+
+        cursor.execute(sentence1, dt)
+        for row in cursor:
+            print(f"Available caregivers for date {dt}:")
+            print(f"{row[0]}") is not None
+        
+        cursor.execute(sentence2)
+        for row in cursor:
+            print(f"Available vaccine and doses:")
+            print(f"{row[1]} in {row[0]}") is not None
+
     except pymssql.Error as e:
         print("Please try again!")
         print("Db-Error:", e)
@@ -243,14 +266,14 @@ def search_caregiver_schedule(tokens):
         print("Please try again!")
         print("Error:", e)
         return
-    print("Availability uploaded!")
-
+    finally:
+        cm.close_connection()
 
 def reserve(tokens):
     """
     TODO: Part 2
     """
-    pass
+    global current_patient
 
 
 def upload_availability(tokens):

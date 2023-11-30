@@ -26,6 +26,7 @@ class Caregiver:
                 curr_salt = row['Salt']
                 curr_hash = row['Hash']
                 calculated_hash = Util.generate_hash(self.password, curr_salt)
+                # Check whether info in python object matches with that of in database object
                 if not curr_hash == calculated_hash:
                     # print("Incorrect password")
                     cm.close_connection()
@@ -50,6 +51,7 @@ class Caregiver:
     def get_hash(self):
         return self.hash
 
+    # save caregiver object's info into database
     def save_to_db(self):
         cm = ConnectionManager()
         conn = cm.create_connection()
@@ -65,15 +67,15 @@ class Caregiver:
         finally:
             cm.close_connection()
 
-    # Insert availability with parameter date d
-    def upload_availability(self, datetime):
+    # Insert availability with parameter date dt
+    def upload_availability(self, dt):
         cm = ConnectionManager()
         conn = cm.create_connection()
         cursor = conn.cursor()
 
         add_availability = "INSERT INTO Availabilities VALUES (%s , %s)"
         try:
-            cursor.execute(add_availability, (datetime, self.username))
+            cursor.execute(add_availability, (dt, self.username))
             # you must call commit() to persist your data if you don't set autocommit to True
             conn.commit()
         except pymssql.Error:
