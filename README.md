@@ -8,3 +8,6 @@ Platform for booking vaccination appointments with caregivers. The application i
 - Patient Login
 - Caregiver Login
 - User (Patient, Caregiver) Authentication
+- Appointment Indexing
+- Vaccine Insertion
+- Appointment Reserve
