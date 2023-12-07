@@ -300,9 +300,9 @@ def reserve(tokens):
         
         # Return if no available doses for current vaccine.
         sentence1 = """
-                SELECT name, doses FROM 
-                FROM [dbo].[Vaccines] V
-                WHERE V.doses = %s"""
+                SELECT name, doses
+                FROM Vaccines V
+                WHERE V.name = %s"""
         cursor.execute(sentence1, vaccine_name)
         for row in cursor:
             if row['doses'] < 1:
@@ -313,24 +313,18 @@ def reserve(tokens):
 
         # Return if no available doctors or doctors' availabilites are filled up.   
         sentence2 = """
-                SELECT Username
-                FROM Caregivers C
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM Availabilities A
-                    WHERE A.Username = C.Username
-                    AND A.Time = %s
-                ) AND NOT EXISTS (
-                    SELECT 1
-                    FROM Reservations R
-                    WHERE R.CaregiverName = C.Username
-                    AND R.Time = %s);"""
-        cursor.execute(sentence2, dt, dt)
+                SELECT TOP 1 Username
+                FROM Availabilities a
+                LEFT JOIN Reservations r ON a.Username = r.CaregiverName AND a.Time = r.Time
+                WHERE a.Time = %s AND r.Id IS NULL"""
+        cursor.execute(sentence2, dt)
+        # print("Filter Accomplish")
         for row in cursor:
             if row['Username'] is None:
                 print("No Caregiver is available!")
                 return
             else:
+                print("Conditions satisfied. Start Reservation")
                 # Decrease one available dose for current vaccine 
                 vac.decrease_available_doses(1)
                 # Record the reservation details
@@ -339,10 +333,10 @@ def reserve(tokens):
                                 VALUES(%s, %s, %s, %s)"""
                 cursor.execute(
                     add_reservation, 
-                    dt, 
+                    (dt, 
                     current_patient.username,
                     row['Username'],
-                    vac.vaccine_name
+                    vac.vaccine_name)
                 )
                 conn.commit()
                 print(f"Successfully Reserved with {row['Username']}! Received vaccination {vac.vaccine_name} on {dt}!")
@@ -490,7 +484,7 @@ def show_appointments(tokens):
                 # print the appointment ID, vaccine name, date, and caregiver name. Order by the appointment ID
                 str2 = """
                     SELECT Id, VaccineName, Time, CaregiverName FROM Reservations R 
-                    WHERE R.CaregiverName = %s
+                    WHERE R.PatientName = %s
                     ORDER BY R.Id"""
                 print("Appointment ID | Vaccine | Date | Caregiver Name")
                 cursor.execute(str2, current_patient.username)
@@ -507,22 +501,6 @@ def show_appointments(tokens):
             print("Please try again!")
             print("Error:", e)
             return
-            
-
-    # else:
-    #     cm = ConnectionManager()
-    #     conn = cm.create_connection()
-    #     cursor = conn.cursor()
-    #
-    #     if current_caregiver is not None:
-    #         add_availability = "INSERT INTO Availabilities VALUES (%s , %s)"
-    #         str1 = "SELECT ROW_NUMBER() OVER (ORDER BY Reservations.Time) AS AppointmentID, Vaccines.Name AS VaccineName, Reservations.Time AS Date,Patients.Username AS PatientName "
-    #         str2 = "FROM Reservations "
-    #         str3 = "JOIN Vaccines ON Reservations.VaccineName = %s JOIN Patients ON Reservations.PatientName = %s JOIN Caregivers ON Reservations.CaregiverName = %s ORDER BY AppointmentID"
-    #         show_appoint_caregiver = str1 + str2 + str3
-    #         try:
-    #             cursor.execute(show_appoint_caregiver, current_caregiver.)
-    #     else:
 
 
 def logout(tokens):
