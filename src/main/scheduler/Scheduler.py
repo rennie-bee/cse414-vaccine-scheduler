@@ -5,7 +5,7 @@ from util.Util import Util
 from db.ConnectionManager import ConnectionManager
 import pymssql
 import datetime
-
+import re
 
 '''
 objects to keep track of the currently logged-in user
@@ -16,6 +16,20 @@ current_patient = None
 
 current_caregiver = None
 
+def is_strong_password(password):
+    if len(password) < 8:
+        print("Password length should be at least 8")
+        return False
+    if not any(char.isupper() for char in password) or not any(char.islower() for char in password):
+        print("Password should contain both upper and lower cases")
+        return False
+    if not any(char.isdigit() for char in password):
+        print("Password should contain digit")
+        return False
+    if not re.search(r'[!@#?]', password):
+        print("Password should contain any of !@#?")
+        return False
+    return True
 
 def create_patient(tokens):
     """
@@ -29,6 +43,8 @@ def create_patient(tokens):
 
     patient_name = tokens[1]
     patient_pwd = tokens[2]
+    if not is_strong_password(password=patient_pwd):
+        return
     if username_exists_patient(patient_name):
         print("Username taken, try again!")
         return
@@ -61,6 +77,8 @@ def create_caregiver(tokens):
 
     username = tokens[1]
     password = tokens[2]
+    if not is_strong_password(password=password):
+        return
     # check 2: check if the username has been taken already
     if username_exists_caregiver(username):
         print("Username taken, try again!")
@@ -396,6 +414,7 @@ def cancel(tokens):
     """
     TODO: Extra Credit
     """
+
     pass
 
 
@@ -547,7 +566,7 @@ def start():
             print("Please try again!")
             break
 
-        response = response.lower()
+        # response = response.lower()
         tokens = response.split(" ")
         if len(tokens) == 0:
             ValueError("Please try again!")
