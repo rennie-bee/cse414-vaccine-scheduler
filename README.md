@@ -7,7 +7,6 @@ A python-based platform enabling patients to book vaccination appointments with 
 * Vaccines: these are vaccine doses in the health organization’s inventory of medical supplies that are on hand and ready to be given to the patients.
 
 
-
 ## Functionalities
 - create_patient (username, password)
 - create_caregiver (username, password)
@@ -21,3 +20,10 @@ A python-based platform enabling patients to book vaccination appointments with 
 - show_appointments
 - logout
 - quit
+
+
+## Technologies Used 🛠️
+- Python
+- Pymssql
+- Microsoft SQL Server
+- MicroSoft Azure
