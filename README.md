@@ -26,4 +26,4 @@ A python-based platform enabling patients to book vaccination appointments with 
 - Python
 - Pymssql
 - Microsoft SQL Server
-- MicroSoft Azure
+- Microsoft Azure
